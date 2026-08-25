@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Générateur d'icônes TechKevin</title></head>
+<body style="font-family:sans-serif;background:#111;color:#fff;text-align:center;padding:30px">
+<h2>🎨 Générateur d'icônes - Technique by Kevin</h2>
+<p>Cliquez sur chaque lien pour télécharger, puis placez les fichiers dans le dossier <code>icons/</code></p>
+<canvas id="c512" width="512" height="512" style="width:140px;border:1px solid #333"></canvas>
+<canvas id="c192" width="192" height="192" style="width:80px;border:1px solid #333"></canvas>
+<br><br>
+<a id="d512" download="icon-512.png" style="color:#00d4ff">⬇️ Télécharger icon-512.png</a> &nbsp;|&nbsp;
+<a id="d192" download="icon-192.png" style="color:#00d4ff">⬇️ Télécharger icon-192.png</a>
+<script>
+function draw(canvas) {
+  const ctx = canvas.getContext('2d'); const s = canvas.width;
+  const g = ctx.createLinearGradient(0, 0, s, s);
+  g.addColorStop(0, '#050505'); g.addColorStop(1, '#00334d');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
+  ctx.strokeStyle = '#00d4ff'; ctx.lineWidth = s * 0.03;
+  ctx.strokeRect(s * 0.05, s * 0.05, s * 0.9, s * 0.9);
+  ctx.fillStyle = '#00d4ff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = 'bold ' + (s * 0.30) + 'px Segoe UI, sans-serif';
+  ctx.fillText('TK', s / 2, s * 0.40);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold ' + (s * 0.075) + 'px Segoe UI, sans-serif';
+  ctx.fillText('TECHNIQUE by KEVIN', s / 2, s * 0.66);
+  ctx.font = (s * 0.14) + 'px serif';
+  ctx.fillText('🚗', s / 2, s * 0.82);
+}
+const c512 = document.getElementById('c512'), c192 = document.getElementById('c192');
+draw(c512); draw(c192);
+document.getElementById('d512').href = c512.toDataURL('image/png');
+document.getElementById('d192').href = c192.toDataURL('image/png');
+</script>
+</body></html>
