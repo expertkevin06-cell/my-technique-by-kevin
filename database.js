@@ -1,6 +1,6 @@
 const DB = {
   data: [],
-  STORAGE_KEY: 'tk_db_v5_lines', // Nouvelle clé = régénération auto avec 4 lignes de specs
+  STORAGE_KEY: 'tk_db_v6_full', // Nouvelle clé = régénération auto sur tous les appareils
 
   init() {
     const cached = localStorage.getItem(this.STORAGE_KEY);
@@ -39,9 +39,9 @@ const DB = {
 
   detectBodyType(model) {
     const m = model.toLowerCase();
-    const vans = ['dokker', 'lodgy', 'jogger', 'berlingo', 'spacetourer', 'logan mcv', 'kangoo', 'combo', 'trafic'];
-    const suv = ['duster', 'bigster', 'captur', '2008', '3008', '5008', 'c5 aircross', 'austral', 'koleos', 'rafale', 'arkana', 'tiguan', 't-roc', 't-cross', 'taigo', 'id.4', 'id.3', 'x1', 'x3', 'x5', 'glc', 'gla', 'gle', 'xc40', 'xc60', 'xc90', 'ex30', 'ex90', 'rav4', 'c-hr', 'yaris cross', 'tucson', 'sportage', 'ev6', 'niro', 'kona', 'cx-5', 'cx-30', 'cx-60', 'ioniq 5', 'mach-e', 'kuga', 'compass', 'renegade', 'avenger', 'wrangler', 'grand cherokee', 'model y', 'model x', 'e-tron', 'q3', 'q5', 'q2', '500x'];
-    const city = ['clio', '208', 'yaris', 'i10', 'i20', 'picanto', 'rio', 'fiesta', 'polo', 'c3', 'twingo', 'spring', 'ami', '500', 'panda', 'micra', 'sandero', 'aygo', 'swift', 'corsa', 'jazz', 'mazda 2'];
+    const vans = ['dokker', 'lodgy', 'jogger', 'berlingo', 'spacetourer', 'logan mcv', 'kangoo', 'combo', 'trafic', 'rifter', 'caddy'];
+    const suv = ['duster', 'bigster', 'captur', '2008', '3008', '5008', 'c5 aircross', 'c3 aircross', 'austral', 'koleos', 'rafale', 'arkana', 'tiguan', 't-roc', 't-cross', 'taigo', 'id.4', 'id.3', 'x1', 'x3', 'x5', 'glc', 'gla', 'gle', 'xc40', 'xc60', 'xc90', 'ex30', 'ex90', 'rav4', 'c-hr', 'yaris cross', 'tucson', 'sportage', 'ev6', 'niro', 'kona', 'cx-5', 'cx-30', 'cx-60', 'ioniq 5', 'mach-e', 'kuga', 'compass', 'renegade', 'avenger', 'wrangler', 'grand cherokee', 'model y', 'model x', 'e-tron', 'q3', 'q5', 'q2', '500x'];
+    const city = ['clio', '208', '108', 'yaris', 'i10', 'i20', 'picanto', 'rio', 'fiesta', 'polo', 'c3', 'c1', 'twingo', 'spring', 'ami', '500', 'panda', 'micra', 'sandero', 'aygo', 'swift', 'corsa', 'jazz', 'mazda 2', 'up'];
     if (vans.some(k => m.includes(k))) return 'Ludospace';
     if (suv.some(k => m.includes(k))) return 'SUV/Crossover';
     if (city.some(k => m.includes(k))) return 'Citadine';
@@ -53,14 +53,12 @@ const DB = {
     const power = this.extractPower(motor);
     const body = this.detectBodyType(model);
 
-    // Couple (Nm)
     let torque;
     if (fuel === 'Électrique') torque = Math.round(100 + power * 0.6);
     else if (fuel === 'Hybride') torque = Math.round(power * 1.6);
     else if (fuel === 'Diesel') torque = Math.round(power * 2.3);
     else torque = Math.round(power * 1.8);
 
-    // Consommation
     let consumption;
     if (fuel === 'Électrique') consumption = (12 + power / 25).toFixed(1) + ' kWh/100km';
     else if (fuel === 'Hybride') consumption = (4.0 + power / 200).toFixed(1) + ' L/100km';
@@ -68,13 +66,11 @@ const DB = {
     else if (fuel === 'GPL') consumption = (6.2 + power / 80).toFixed(1) + ' L GPL/100km';
     else consumption = (5.2 + power / 80).toFixed(1) + ' L/100km';
 
-    // CO2
     let co2 = 0;
     if (fuel !== 'Électrique') {
       co2 = Math.round(parseFloat(consumption) * (fuel === 'Diesel' ? 26.4 : 23.5));
     }
 
-    // Boîte
     let transmission;
     if (fuel === 'Électrique') transmission = 'Directe';
     else if (fuel === 'Hybride') transmission = 'AMT E-Tech';
@@ -83,31 +79,26 @@ const DB = {
       transmission = boxes[Math.floor(Math.random() * boxes.length)];
     }
 
-    // Transmission au sol
     const fourWD = ['Duster', 'Bigster', 'Koleos', 'Austral', 'Tiguan', 'X3', 'GLC', 'Q5', 'RAV4', 'CR-V', 'CX-5', 'Sportage', 'Wrangler', 'Compass', 'Renegade', 'Outlander', 'Forester'];
     let drivetrain = 'Traction';
     if (fourWD.includes(model) && Math.random() > 0.4) drivetrain = '4x4';
     else if (power >= 250 && Math.random() > 0.5) drivetrain = 'Quattro/AWD';
 
-    // 0-100 km/h (s)
     let z = 1200 / power + 2;
     if (fuel === 'Électrique') z -= 1.5;
     if (fuel === 'Hybride') z -= 0.5;
     z = Math.min(16, Math.max(3.2, z));
     const zeroTo100 = z.toFixed(1);
 
-    // Vitesse max (km/h)
     let ts = 105 + power * 0.7;
     if (fuel === 'Électrique') ts = Math.min(ts, 180);
     const topSpeed = Math.round(Math.min(290, Math.max(120, ts)));
 
-    // Poids (kg)
     const baseWeight = { 'Citadine': 1050, 'Berline': 1300, 'SUV/Crossover': 1450, 'Ludospace': 1500 };
     let weight = baseWeight[body] + power * 2;
     if (fuel === 'Électrique') weight += 250;
     weight = Math.round(weight / 10) * 10;
 
-    // Coffre (L) + places
     const baseTrunk = { 'Citadine': 300, 'Berline': 480, 'SUV/Crossover': 470, 'Ludospace': 650 };
     const trunk = baseTrunk[body] + Math.floor(Math.random() * 60);
     const seats = ['Jogger', 'Lodgy', 'Dokker', 'Berlingo', 'SpaceTourer'].includes(model) ? 7 : 5;
@@ -115,21 +106,21 @@ const DB = {
     return { power, torque, fuel, transmission, drivetrain, consumption, co2, body, zeroTo100, topSpeed, weight, trunk, seats };
   },
 
-  // ---------- GÉNÉRATION >10 000 FICHES ----------
+  // ---------- GÉNÉRATION DÉTERMINISTE ≥ 10 000 FICHES ----------
   generate() {
     console.time('[DB] Génération');
 
     const brandsData = {
       francaise: {
-        'Renault': ['Clio', 'Megane', 'Captur', 'Austral', 'Zoe', 'Arkana'],
-        'Peugeot': ['208', '308', '3008', '508', '408', '2008'],
-        'Citroen': ['C3', 'C4', 'C5 Aircross', 'Ami', 'Berlingo'],
+        'Renault': ['Clio', 'Megane', 'Captur', 'Austral', 'Zoe', 'Arkana', 'Twingo', 'Kangoo'],
+        'Peugeot': ['208', '308', '3008', '508', '408', '2008', 'Rifter', '108'],
+        'Citroen': ['C3', 'C4', 'C5 Aircross', 'Ami', 'Berlingo', 'C3 Aircross', 'C1'],
         'DS': ['DS3 Crossback', 'DS4', 'DS7 Crossback', 'DS9'],
         'Dacia': ['Sandero', 'Sandero Stepway', 'Logan', 'Logan MCV', 'Duster', 'Jogger', 'Spring', 'Dokker', 'Lodgy', 'Bigster'],
         'Alpine': ['A110']
       },
       europeenne: {
-        'Volkswagen': ['Golf', 'Polo', 'Tiguan', 'T-Roc', 'ID.3', 'ID.4', 'Passat'],
+        'Volkswagen': ['Golf', 'Polo', 'Tiguan', 'T-Roc', 'ID.3', 'ID.4', 'Passat', 'Up', 'Caddy'],
         'Audi': ['A1', 'A3', 'A4', 'Q3', 'Q5', 'e-tron'],
         'BMW': ['Serie 1', 'Serie 3', 'X1', 'X3', 'i4'],
         'Mercedes': ['Classe A', 'Classe C', 'GLA', 'GLC', 'EQS'],
@@ -143,25 +134,35 @@ const DB = {
         'Chevrolet': ['Camaro', 'Corvette', 'Bolt EV']
       },
       asiatique: {
-        'Toyota': ['Yaris', 'Corolla', 'C-HR', 'RAV4', 'Yaris Cross'],
+        'Toyota': ['Yaris', 'Corolla', 'C-HR', 'RAV4', 'Yaris Cross', 'Aygo X'],
         'Honda': ['Civic', 'CR-V', 'Jazz', 'HR-V'],
-        'Hyundai': ['i10', 'i20', 'Tucson', 'Ioniq 5', 'Kona'],
+        'Hyundai': ['i10', 'i20', 'Tucson', 'Ioniq 5', 'Kona', 'i30'],
         'Kia': ['Picanto', 'Ceed', 'Sportage', 'EV6', 'Niro'],
         'Mazda': ['Mazda 2', 'Mazda 3', 'CX-5', 'MX-5']
       }
     };
 
-    const motorsDacia = [
-      'SCe 65 1.0 65ch', 'TCe 90 1.0 90ch', 'TCe 100 1.0 100ch', 'TCe 130 1.3 130ch',
-      'Blue dCi 95 1.5 95ch', 'Blue dCi 115 1.5 115ch', 'ECO-G 100 1.0 GPL 100ch',
-      'E-Tech Hybrid 140ch', 'Spring Electric 45ch (33kW)', 'Spring Electric 65ch (48kW)'
-    ];
-
+    // Motorisations complètes par gamme (TOUTES assignées = 10 000+ garanti)
     const motorsGeneric = [
       '1.0 TSI 95ch', '1.0 TSI 110ch', '1.5 TSI 150ch', '2.0 TSI 190ch',
       '1.6 TDI 95ch', '2.0 TDI 150ch', '1.5 BlueHDi 130ch', '2.0 BlueHDi 180ch',
       'Hybride Rechargeable 225ch', '100% Électrique 136ch', '100% Électrique 204ch', 'V6 3.0 340ch'
     ];
+
+    const motorsDacia = [
+      'SCe 65 1.0 65ch', 'TCe 90 1.0 90ch', 'TCe 100 1.0 100ch', 'TCe 130 1.3 130ch',
+      'Blue dCi 95 1.5 95ch', 'Blue dCi 115 1.5 115ch', 'ECO-G 100 1.0 GPL 100ch',
+      'E-Tech Hybrid 140ch'
+    ];
+
+    const motorsElectric = [
+      '100% Électrique 136ch', '100% Électrique 156ch', '100% Électrique 204ch', '100% Électrique 286ch'
+    ];
+
+    const motorsSpring = ['Spring Electric 45ch (33kW)', 'Spring Electric 65ch (48kW)'];
+
+    // Modèles 100% électriques (reçoivent uniquement les motorisations électriques)
+    const electricOnly = ['Zoe', 'Ami', 'ID.3', 'ID.4', 'e-tron', 'Model 3', 'Model Y', 'Model S', 'Model X', 'Mach-E', 'Bolt EV', 'Ioniq 5', 'EV6', 'EX30', 'i4', 'EQS'];
 
     const globalDTCs = [
       {c:'P0300', d:'Ratés d\'allumage aléatoires'}, {c:'P0420', d:'Efficacité catalyseur faible'},
@@ -205,7 +206,6 @@ const DB = {
       for (let brand in brandsData[origin]) {
         const isDacia = (brand === 'Dacia');
         const models = brandsData[origin][brand];
-        const availableMotors = isDacia ? motorsDacia : motorsGeneric;
         const availableDTCs = isDacia ? [...globalDTCs, ...daciaDTCs] : globalDTCs;
         const availableIssues = isDacia ? [...globalIssues, ...daciaIssues] : globalIssues;
         const availableRecalls = isDacia ? [...recallsPool, ...daciaRecalls] : recallsPool;
@@ -213,13 +213,20 @@ const DB = {
         for (let model of models) {
           for (let year = 2018; year <= 2026; year++) {
 
-            if ((model === 'Spring' || model === 'Bigster' || model === 'EX30') && year < 2021) continue;
+            // Cohérence des années de commercialisation
+            if ((model === 'Spring' || model === 'EX30') && year < 2021) continue;
+            if (model === 'Bigster' && year < 2025) continue;
             if (model === 'Dokker' && year > 2021) continue;
 
-            const numMotors = 3 + Math.floor(Math.random() * 2);
+            // Choix déterministe de la gamme de motorisations
+            let motors;
+            if (isDacia && model === 'Spring') motors = motorsSpring;
+            else if (isDacia) motors = motorsDacia;
+            else if (electricOnly.includes(model)) motors = motorsElectric;
+            else motors = motorsGeneric;
 
-            for (let i = 0; i < numMotors; i++) {
-              const motor = availableMotors[Math.floor(Math.random() * availableMotors.length)];
+            // TOUTES les motorisations de la gamme = volume garanti
+            for (let motor of motors) {
 
               const hasRecall = Math.random() > 0.8;
               const hasDTC = Math.random() > 0.6;
@@ -245,7 +252,7 @@ const DB = {
 
     this.data = tempData;
     console.timeEnd('[DB] Génération');
-    console.log(`[DB] Généré: ${this.data.length} fiches avec specs 4 lignes.`);
+    console.log(`[DB] Généré: ${this.data.length} fiches (objectif ≥ 10 000).`);
   },
 
   save() {
