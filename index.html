@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#00d4ff">
+  <title>Technique by Kevin</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <!-- Librairie PDF robuste -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Écran de chargement -->
+  <div id="splash">
+    <h1>Technique by Kevin</h1>
+    <p>Initialisation de la base de données technique...</p>
+    <div class="loader"></div>
+  </div>
+
+  <!-- En-tête -->
+  <header>
+    <div class="logo">🚗 TechKevin</div>
+    <nav>
+      <button data-target="sec-filter" class="active">Filtres</button>
+      <button data-target="sec-ai">IA Search</button>
+      <button data-target="sec-admin">Admin</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- SECTION FILTRES -->
+    <section id="sec-filter" class="section active">
+      <h2>Recherche par Filtres</h2>
+      <div class="grid-filters">
+        <select id="f-origin"><option value="">Toutes Origines</option></select>
+        <select id="f-brand"><option value="">Toutes Marques</option></select>
+        <select id="f-model"><option value="">Tous Modèles</option></select>
+        <select id="f-year"><option value="">Toutes Années (2018-2026)</option></select>
+      </div>
+      <button class="btn btn-primary" id="btn-filter">🔍 Rechercher dans la base</button>
+      <div id="filter-results" class="results-container"></div>
+    </section>
+
+    <!-- SECTION IA -->
+    <section id="sec-ai" class="section">
+      <h2>Recherche Intelligente (IA)</h2>
+      <p class="subtitle">Posez une question, tapez un code DTC (ex: P0420), ou un symptôme.</p>
+      <div class="search-box">
+        <input type="text" id="ai-input" placeholder="Ex: Dacia Duster bruit moteur, P0087, Spring électrique...">
+        <button class="btn btn-primary" id="btn-ai">🤖 Analyser</button>
+      </div>
+      <div id="ai-results" class="results-container"></div>
+    </section>
+
+    <!-- SECTION ADMIN -->
+    <section id="sec-admin" class="section">
+      <h2>Espace Administration</h2>
+      <div id="admin-login">
+        <input type="password" id="admin-pass" placeholder="Mot de passe (Kevin83600)">
+        <button class="btn btn-primary" id="btn-admin-login">Se connecter</button>
+      </div>
+      
+      <div id="admin-panel" style="display: none;">
+        <div class="card admin-stats" id="admin-stats"></div>
+        <button class="btn" id="btn-sync-gh">🔄 Sync GitHub / Qwen (Temps réel)</button>
+        <button class="btn btn-danger" id="btn-reset-db">⚠️ Forcer régénération BDD (>10k fiches)</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Boutons Partage -->
+  <div class="fab-container">
+    <button class="fab" onclick="shareApp('sms')" title="Partager par SMS">💬</button>
+    <button class="fab" onclick="shareApp('email')" title="Partager par Email">✉️</button>
+  </div>
+
+  <!-- Barre d'auto-vérification -->
+  <footer id="status-bar">
+    <span>Vérification système...</span>
+  </footer>
+
+  <!-- Scripts dans l'ordre d'exécution -->
+  <script src="database.js"></script>
+  <script src="ai-search.js"></script>
+  <script src="pdf-generator.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
