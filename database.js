@@ -1,25 +1,80 @@
+// ============================================================
+// MOTEUR DE STOCKAGE IndexedDB (grande capacité, remplace localStorage)
+// ============================================================
+const IDB = {
+  open() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('techkevin-db', 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('store')) db.createObjectStore('store');
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  },
+  async set(key, value) {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('store', 'readwrite');
+      tx.objectStore('store').put(value, key);
+      tx.oncomplete = () => { db.close(); resolve(true); };
+      tx.onerror = () => { db.close(); reject(tx.error); };
+    });
+  },
+  async get(key) {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('store', 'readonly');
+      const req = tx.objectStore('store').get(key);
+      req.onsuccess = () => { db.close(); resolve(req.result); };
+      req.onerror = () => { db.close(); reject(req.error); };
+    });
+  }
+};
+
 const DB = {
   data: [],
-  STORAGE_KEY: 'tk_db_v6_full', // Nouvelle clé = régénération auto sur tous les appareils
+  persisted: false,
+  STORAGE_KEY: 'tk_db_v7_idb',
 
   init() {
-    const cached = localStorage.getItem(this.STORAGE_KEY);
-    if (cached) {
-      try {
-        this.data = JSON.parse(cached);
-        console.log(`[DB] Chargée depuis LocalStorage: ${this.data.length} fiches.`);
-      } catch (e) {
-        console.error("[DB] Erreur parsing, régénération...", e);
-        this.generateAndSave();
+    return this._init();
+  },
+
+  async _init() {
+    // 1. Tentative de chargement depuis IndexedDB
+    try {
+      const cached = await IDB.get(this.STORAGE_KEY);
+      if (cached && cached.length) {
+        this.data = cached;
+        this.persisted = true;
+        console.log(`[DB] Chargée depuis IndexedDB : ${this.data.length} fiches.`);
+        return;
       }
-    } else {
-      this.generateAndSave();
+    } catch (e) {
+      console.warn('[DB] IndexedDB indisponible :', e.message);
+    }
+
+    // 2. Sinon génération + sauvegarde
+    this.generate();
+    await this.save();
+  },
+
+  async save() {
+    try {
+      await IDB.set(this.STORAGE_KEY, this.data);
+      this.persisted = true;
+      console.log(`[DB] Sauvegardée dans IndexedDB (${this.data.length} fiches).`);
+    } catch (e) {
+      this.persisted = false;
+      console.error('[DB] Échec de sauvegarde :', e);
     }
   },
 
-  generateAndSave() {
+  async generateAndSave() {
     this.generate();
-    this.save();
+    await this.save();
   },
 
   // ---------- OUTILS SPECS TECHNIQUES ----------
@@ -106,7 +161,7 @@ const DB = {
     return { power, torque, fuel, transmission, drivetrain, consumption, co2, body, zeroTo100, topSpeed, weight, trunk, seats };
   },
 
-  // ---------- GÉNÉRATION DÉTERMINISTE ≥ 10 000 FICHES ----------
+  // ---------- GÉNÉRATION ≥ 10 000 FICHES ----------
   generate() {
     console.time('[DB] Génération');
 
@@ -142,7 +197,6 @@ const DB = {
       }
     };
 
-    // Motorisations complètes par gamme (TOUTES assignées = 10 000+ garanti)
     const motorsGeneric = [
       '1.0 TSI 95ch', '1.0 TSI 110ch', '1.5 TSI 150ch', '2.0 TSI 190ch',
       '1.6 TDI 95ch', '2.0 TDI 150ch', '1.5 BlueHDi 130ch', '2.0 BlueHDi 180ch',
@@ -161,7 +215,6 @@ const DB = {
 
     const motorsSpring = ['Spring Electric 45ch (33kW)', 'Spring Electric 65ch (48kW)'];
 
-    // Modèles 100% électriques (reçoivent uniquement les motorisations électriques)
     const electricOnly = ['Zoe', 'Ami', 'ID.3', 'ID.4', 'e-tron', 'Model 3', 'Model Y', 'Model S', 'Model X', 'Mach-E', 'Bolt EV', 'Ioniq 5', 'EV6', 'EX30', 'i4', 'EQS'];
 
     const globalDTCs = [
@@ -213,19 +266,16 @@ const DB = {
         for (let model of models) {
           for (let year = 2018; year <= 2026; year++) {
 
-            // Cohérence des années de commercialisation
             if ((model === 'Spring' || model === 'EX30') && year < 2021) continue;
             if (model === 'Bigster' && year < 2025) continue;
             if (model === 'Dokker' && year > 2021) continue;
 
-            // Choix déterministe de la gamme de motorisations
             let motors;
             if (isDacia && model === 'Spring') motors = motorsSpring;
             else if (isDacia) motors = motorsDacia;
             else if (electricOnly.includes(model)) motors = motorsElectric;
             else motors = motorsGeneric;
 
-            // TOUTES les motorisations de la gamme = volume garanti
             for (let motor of motors) {
 
               const hasRecall = Math.random() > 0.8;
@@ -252,16 +302,7 @@ const DB = {
 
     this.data = tempData;
     console.timeEnd('[DB] Génération');
-    console.log(`[DB] Généré: ${this.data.length} fiches (objectif ≥ 10 000).`);
-  },
-
-  save() {
-    try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
-      console.log("[DB] Sauvegardée dans LocalStorage.");
-    } catch (e) {
-      console.error("[DB] Quota LocalStorage dépassé !", e);
-    }
+    console.log(`[DB] Généré : ${this.data.length} fiches.`);
   },
 
   filter(criteria) {
