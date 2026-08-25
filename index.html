@@ -54,11 +54,11 @@
       <div id="ai-results" class="results-container"></div>
     </section>
 
-    <!-- SECTION ADMIN -->
+    <!-- SECTION ADMIN (mot de passe jamais visible) -->
     <section id="sec-admin" class="section">
       <h2>Espace Administration</h2>
       <div id="admin-login">
-        <input type="password" id="admin-pass" placeholder="Mot de passe (Kevin83600)">
+        <input type="password" id="admin-pass" placeholder="Mot de passe administrateur" autocomplete="off" autocorrect="off" autocapitalize="off">
         <button class="btn btn-primary" id="btn-admin-login">Se connecter</button>
       </div>
       
@@ -85,6 +85,9 @@
   <script src="database.js"></script>
   <script src="ai-search.js"></script>
   <script src="pdf-generator.js"></script>
+  <script src="config.js"></script>
+  <script src="github-sync.js"></script>
   <script src="app.js"></script>
+  <script src="admin-tools.js"></script>
 </body>
 </html>
