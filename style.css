@@ -55,7 +55,7 @@ h2 { color: var(--primary); margin-bottom: 15px; font-size: 1.5rem; }
 
 /* Forms */
 .grid-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-select, input[type="text"], input[type="password"] {
+select, input[type="text"], input[type="password"], input[type="number"] {
   width: 100%; padding: 12px; background: rgba(0,0,0,0.6); border: 1px solid #444;
   border-radius: 8px; color: #fff; font-size: 1rem; outline: none; transition: border 0.3s;
 }
@@ -82,7 +82,7 @@ select option { background: #111; color: #fff; }
 .card h3 small { color: #888; font-size: 0.75rem; font-weight: normal; }
 .card p { margin: 5px 0; font-size: 0.95rem; color: #ddd; }
 
-/* --- Specs techniques : LIGNES DÉTAILLÉES (4 lignes) --- */
+/* --- Specs techniques : 4 LIGNES DÉTAILLÉES --- */
 .spec-lines {
   margin: 10px 0; padding: 8px 12px; background: rgba(0,0,0,0.45);
   border-radius: 8px; display: flex; flex-direction: column; gap: 5px;
@@ -116,4 +116,25 @@ select option { background: #111; color: #fff; }
   display: flex; justify-content: center; align-items: center;
 }
 
-/* Footer Status Bar
+/* Footer Status Bar (auto-vérifications) */
+#status-bar {
+  position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.95);
+  padding: 8px 15px; font-size: 0.75rem; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 5px;
+  border-top: 1px solid #333; z-index: 100;
+}
+.status-ok { color: var(--success); }
+.status-err { color: var(--danger); }
+
+/* Admin */
+.admin-stats { border-left-color: #ffa502; margin-bottom: 15px; }
+.admin-stats p { margin: 5px 0; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .grid-filters { grid-template-columns: 1fr; }
+  .search-box { flex-direction: column; }
+  header { flex-direction: column; gap: 10px; }
+  nav { width: 100%; justify-content: space-between; }
+  nav button { flex: 1; text-align: center; }
+  .spec-line { font-size: 0.75rem; }
+}
