@@ -6,7 +6,7 @@ async function generatePDF(vehicleId) {
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  
+
   const v = DB.data.find(x => x.id === vehicleId);
   if (!v) {
     alert("Véhicule introuvable dans la base.");
@@ -16,12 +16,12 @@ async function generatePDF(vehicleId) {
   // --- EN-TÊTE ---
   doc.setFillColor(5, 5, 5);
   doc.rect(0, 0, 210, 40, 'F');
-  
+
   doc.setTextColor(0, 212, 255);
   doc.setFontSize(22);
   doc.setFont("helvetica", "bold");
   doc.text('Technique by Kevin', 105, 20, { align: 'center' });
-  
+
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(12);
   doc.setFont("helvetica", "normal");
@@ -34,7 +34,7 @@ async function generatePDF(vehicleId) {
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.text(`${v.brand} ${v.model}`, 20, y);
-  
+
   doc.setFontSize(12);
   doc.setFont("helvetica", "normal");
   y += 10;
@@ -43,17 +43,33 @@ async function generatePDF(vehicleId) {
   doc.text(`Motorisation : ${v.motor}`, 20, y);
   y += 7;
   doc.text(`Origine : ${v.origin.charAt(0).toUpperCase() + v.origin.slice(1)}`, 20, y);
-  y += 15;
+  y += 12;
 
-  // Fonction utilitaire pour ajouter des sections avec saut de page automatique
+  // --- SPÉCIFICATIONS TECHNIQUES (4 LIGNES, identiques à l'APK) ---
+  const t = v.technical_specs || {};
+
+  if (y > 250) { doc.addPage(); y = 20; }
+  doc.setDrawColor(0, 100, 200); doc.setLineWidth(0.5); doc.line(20, y, 190, y); y += 8;
+
+  doc.setTextColor(0, 100, 200);
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text('SPÉCIFICATIONS TECHNIQUES', 20, y);
+  y += 8;
+
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text(`L1 : ${t.power != null ? t.power + ' ch' : '—'}  |  ${t.torque != null ? t.torque + ' Nm' : '—'}  |  ${t.fuel || '—'}`, 20, y); y += 7;
+  doc.text(`L2 : ${t.transmission || '—'}  |  ${t.drivetrain || '—'}  |  ${t.body || '—'}`, 20, y); y += 7;
+  doc.text(`L3 : 0-100 ${t.zeroTo100 ? t.zeroTo100 + ' s' : '—'}  |  ${t.topSpeed ? t.topSpeed + ' km/h' : '—'}  |  ${t.weight ? t.weight + ' kg' : '—'}`, 20, y); y += 7;
+  doc.text(`L4 : ${t.co2 != null ? t.co2 + ' g/km' : '—'}  |  ${t.consumption || '—'}  |  ${t.trunk ? t.trunk + ' L / ' + t.seats + ' places' : '—'}`, 20, y); y += 12;
+
+  // --- SECTIONS AVEC SAUT DE PAGE AUTOMATIQUE ---
   const addSection = (title, colorRGB, itemsArray) => {
     if (!itemsArray || itemsArray.length === 0) return;
 
-    // Vérifier s'il faut sauter la page
-    if (y > 260) {
-      doc.addPage();
-      y = 20;
-    }
+    if (y > 260) { doc.addPage(); y = 20; }
 
     doc.setDrawColor(colorRGB[0], colorRGB[1], colorRGB[2]);
     doc.setLineWidth(0.5);
@@ -71,23 +87,14 @@ async function generatePDF(vehicleId) {
     doc.setFont("helvetica", "normal");
 
     itemsArray.forEach(item => {
-      if (y > 280) {
-        doc.addPage();
-        y = 20;
-      }
-      
-      let text = "";
-      if (item.c) { // C'est un DTC
-        text = `[${item.c}] ${item.d}`;
-      } else if (item.cat) { // C'est une panne
-        text = `[${item.cat}] ${item.desc}`;
-      } else if (item.date) { // C'est un rappel
-        text = `(${item.date}) - ${item.desc}`;
-      } else {
-        text = String(item);
-      }
+      if (y > 280) { doc.addPage(); y = 20; }
 
-      // Split text pour éviter les débordements horizontaux
+      let text = "";
+      if (item.c) text = `[${item.c}] ${item.d}`;
+      else if (item.cat) text = `[${item.cat}] ${item.desc}`;
+      else if (item.date) text = `(${item.date}) - ${item.desc}`;
+      else text = String(item);
+
       const splitText = doc.splitTextToSize(`• ${text}`, 170);
       doc.text(splitText, 20, y);
       y += (splitText.length * 6) + 2;
@@ -96,12 +103,11 @@ async function generatePDF(vehicleId) {
     y += 10;
   };
 
-  // --- SECTIONS ---
   addSection('CAMPAGNES DE RAPPEL CONSTRUCTEUR', [255, 165, 2], v.recalls);
   addSection('CODES DTC & DÉFAUTS CALCULATEUR', [255, 71, 87], v.dtcs);
   addSection('PANNES & DYSFONCTIONNEMENTS CONNUS', [150, 0, 200], v.issues);
 
-  // --- PIED DE PAGE ---
+  // --- PIED DE PAGE (toutes pages) ---
   const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
@@ -110,6 +116,5 @@ async function generatePDF(vehicleId) {
     doc.text(`Technique by Kevin - Généré le ${new Date().toLocaleDateString('fr-FR')} - Page ${i}/${pageCount}`, 105, 290, { align: 'center' });
   }
 
-  // Sauvegarde du fichier
   doc.save(`TechKevin_${v.brand}_${v.model}_${v.year}.pdf`);
 }
