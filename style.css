@@ -10,7 +10,6 @@
 
 body {
   background-color: var(--bg-dark);
-  /* Fond d'écran véhicule moderne réaliste (Mercedes S-Class noire) + Overlay sombre */
   background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.85)), url('https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?q=80&w=2070&auto=format&fit=crop');
   background-size: cover;
   background-position: center;
@@ -62,7 +61,6 @@ select, input[type="text"], input[type="password"] {
 }
 select:focus, input:focus { border-color: var(--primary); }
 select option { background: #111; color: #fff; }
-
 .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
 
 /* Buttons */
@@ -74,15 +72,38 @@ select option { background: #111; color: #fff; }
 .btn-primary:hover { filter: brightness(1.1); }
 .btn-danger { background: var(--danger); }
 
-/* Cards (Résultats) */
+/* ============ CARTES RÉSULTATS ============ */
 .results-container { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
 .card {
   background: var(--glass); backdrop-filter: blur(5px); padding: 15px; border-radius: 12px;
   border-left: 4px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
-.card h3 { font-size: 1.2rem; margin-bottom: 5px; display: flex; justify-content: space-between; }
-.card h3 small { color: #888; font-size: 0.8rem; font-weight: normal; }
+.card h3 { font-size: 1.2rem; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: baseline; }
+.card h3 small { color: #888; font-size: 0.75rem; font-weight: normal; }
 .card p { margin: 5px 0; font-size: 0.95rem; color: #ddd; }
+
+/* --- Specs techniques : LIGNES DÉTAILLÉES (4 lignes) --- */
+.spec-lines {
+  margin: 10px 0; padding: 8px 12px; background: rgba(0,0,0,0.45);
+  border-radius: 8px; display: flex; flex-direction: column; gap: 5px;
+  border: 1px solid rgba(0, 212, 255, 0.15);
+}
+.spec-line { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; color: #eaeaea; }
+.spec-line span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spec-line span:nth-child(2) { text-align: center; }
+.spec-line span:last-child { text-align: right; color: var(--primary); }
+
+/* --- Badges d'alertes --- */
+.badges { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: bold; }
+.badge.recall { background: rgba(255,165,2,0.15); color: #ffa502; border: 1px solid #ffa502; }
+.badge.dtc { background: rgba(255,71,87,0.15); color: #ff4757; border: 1px solid #ff4757; }
+.badge.issue { background: rgba(197,108,240,0.15); color: #c56cf0; border: 1px solid #c56cf0; }
+.badge.ok { background: rgba(46,213,115,0.15); color: #2ed573; border: 1px solid #2ed573; }
+
+/* --- Lignes de détail --- */
+.detail-line { font-size: 0.85rem; margin: 4px 0; color: #ddd; }
+.detail-line.recall-line { color: #ffa502; }
 .dtc { color: var(--danger); font-family: monospace; font-weight: bold; }
 .recall { color: #ffa502; font-weight: bold; }
 .insight-card { border-left-color: var(--success); background: rgba(46, 213, 115, 0.1); }
@@ -95,23 +116,4 @@ select option { background: #111; color: #fff; }
   display: flex; justify-content: center; align-items: center;
 }
 
-/* Footer Status Bar */
-#status-bar {
-  position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.95);
-  padding: 8px 15px; font-size: 0.75rem; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 5px;
-  border-top: 1px solid #333; z-index: 100;
-}
-.status-ok { color: var(--success); }
-.status-err { color: var(--danger); }
-
-/* Admin */
-.admin-stats { border-left-color: #ffa502; margin-bottom: 15px; }
-.admin-stats p { margin: 5px 0; }
-
-@media (max-width: 600px) {
-  .grid-filters { grid-template-columns: 1fr; }
-  .search-box { flex-direction: column; }
-  header { flex-direction: column; gap: 10px; }
-  nav { width: 100%; justify-content: space-between; }
-  nav button { flex: 1; text-align: center; }
-}
+/* Footer Status Bar
